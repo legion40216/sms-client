@@ -145,6 +145,9 @@ h1,h2,h3,h4 {
 }
 
 /* general */
+.flow_half > *+*{
+  margin-top: var(--flow-space, 0.3rem);
+}
 
 .flow > *+*{
     margin-top: var(--flow-space, 1rem);
@@ -240,47 +243,92 @@ display: none;
   width: 12rem;
 }
 
-.error{
-  background-color: hsl( var(--color-error-light) );
-  padding: 0.5rem;
-  border: 1px solid hsl( var(--color-error) );
+  .sms_table-options
+  {
+  background-color: hsl( var(--color-white)  );
+  padding: 0.5rem 1rem;
   border-radius: 5px;
-  width:fit-content;
-}
-
-.error p {
-  color: hsl( var(--color-error) );
-}
-
-.success{
-  background-color: hsl( var(--color-success-light) );
-  padding: 0.5rem;
-  border: 1px solid hsl( var(--color-success) );
-  border-radius: 5px;
-  width:fit-content;
-}
-
-.success p {
-  color: hsl( var(--color-success) );
-}
-
-form label{
-  display: block;
-  font-size: var(--fs-100);
-  font-weight: 500;
-  margin-bottom: 0.4rem;
-}
-
-form input{
-  border: 1px solid hsl( var(--color-offwhite) ) ;
-  outline: none;
-  width: 100%;
-  font-weight: 500;
-  padding: 0.7rem 1rem;
-  border-radius: 5px;
+  border: 1px solid hsl( var(--color-offwhite) );
+  }
+  
+  .sms_table-options form{
+    align-items: center;
+  }
+  
+  @media (max-width:45rem) {
+    .sms_table-options form {
+  flex-direction: column;
+    }
+  }
+    
+  .sms_table-table{
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .sms_table-table tr{
+  border-bottom: 1px solid hsl( var(--color-offwhite) );
+  }
+  
+  .sms_table-table th , td
+  {
+    padding: 0.5rem;
   }
 
+  .error{
+    background-color: hsl( var(--color-error-light) );
+    padding: 0.5rem;
+    border: 1px solid hsl( var(--color-error) );
+    border-radius: 5px;
+    width:fit-content;
+  }
+  
+  .error p {
+    color: hsl( var(--color-error) );
+  }
+  
+  .success{
+    background-color: hsl( var(--color-success-light) );
+    padding: 0.5rem;
+    border: 1px solid hsl( var(--color-success) );
+    border-radius: 5px;
+    width:fit-content;
+  }
+  
+  .success p {
+    color: hsl( var(--color-success) );
+  }
+  
 
+  .error_border{
+    border: 1px solid hsl( var(--color-error) ) 
+  }
+
+  form label{
+    display: block;
+    font-size: var(--fs-100);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+  
+  form input{
+    border: 1px solid hsl( var(--color-offwhite) ) ;
+    outline: none;
+    width: 100%;
+    font-weight: 500;
+    padding: 0.7rem 1rem;
+    border-radius: 5px;
+    }
+
+  form select{
+    padding: 0.7rem 0.7rem;
+    padding-right: 3rem;
+    font-size: var(--fs-200);
+    border: 1px solid hsl( var(--color-offwhite) );
+    border-radius: 5px;
+    text-transform: capitalize;
+    font-weight: 500;
+  }
 /* ------------------- */
 /* classes     */
 /* ------------------- */
@@ -393,54 +441,22 @@ nav{
   --gap:2rem
 }
 
-.container--addstudent form  select{
-  padding: 0.7rem 0.7rem;
-  padding-right: 3rem;
-  font-size: var(--fs-200);
-  border: 1px solid hsl( var(--color-offwhite) );
-  border-radius: 5px;
-  font-weight: 500;
-  text-transform: capitalize;
+@media (max-width:45rem) {
+  .container--addstudent .gird-column_two {
+    grid-template-columns: 1fr;
+    --gap:2rem
+  }
 }
 
-.sms_table-options
-{
-background-color: hsl( var(--color-white)  );
-padding: 0.5rem 1rem;
-border-radius: 5px;
-border: 1px solid hsl( var(--color-offwhite) );
-}
-
-.sms_table-options form{
-  align-items: center;
-}
-
-.sms_table-options select{
-  padding: 0.7rem 0.7rem;
-  padding-right: 3rem;
-  font-size: var(--fs-200);
-  border: 1px solid hsl( var(--color-offwhite) );
-  border-radius: 5px;
-  text-transform: capitalize;
-  font-weight: 500;
-}
-
-.sms_table-table{
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.sms_table-table tr{
-border-bottom: 1px solid hsl( var(--color-offwhite) );
-}
-
-.sms_table-table th , td
-{
-  padding: 0.5rem;
-}
-
-.container--managecourse .grid-layout{
+.container--managecourse .gird-column_two{
  --gap:3rem;
+}
+
+@media (max-width:45rem) {
+  .container--managecourse .gird-column_two {
+    grid-template-columns: 1fr;
+    --gap:3rem;
+  }
 }
 
 .added-course-wrapper{
@@ -457,29 +473,18 @@ border-bottom: 1px solid hsl( var(--color-offwhite) );
  font-weight: 300;
 }
 
-.container--manageclasses form  select{
-  padding: 0.3rem;
-  padding-right: 3rem;
-  font-size: var(--fs-200);
-  border: 1px solid hsl( var(--color-offwhite) );
-  border-radius: 5px;
-  font-weight: 500;
-  text-transform: capitalize;
+.container--classmanagement .update_classes select{
   width: 100%;
 }
 
-.create_classes{
+.update_classes{
   padding:  1rem;
   max-width: 400px;
   width: 100%;
   border-radius: 5px;
 }
 
-.create_classes form {
-  --gap: 0.5rem
-}
-
-.create_classes__backdrop{
+.update_classes__backdrop{
   align-items: center;
   justify-content: center;
   position: fixed;
@@ -488,7 +493,7 @@ border-bottom: 1px solid hsl( var(--color-offwhite) );
   inset: 0;
 }
 
-.create_classes .form_course-wrapper
+.form_course-wrapper
 {
   display: flex;
   flex-direction: row;
@@ -499,6 +504,7 @@ border-bottom: 1px solid hsl( var(--color-offwhite) );
   border: 1px solid hsl( var(--color-offwhite) );
   padding: 1rem 0.5rem;
 }
+
 
 /* ------------------- */
 /* button     */

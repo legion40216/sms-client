@@ -3,15 +3,18 @@ import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route} f
 //pages
 import Home from "./pages/Home";
 import AddStudent from "./pages/AddStudent";
-import ShowAllStudents from "./pages/ShowAllStudents";
+import ViewAllStudents from "./pages/ViewAllStudents";
 import AddAttendence from "./pages/AddAttendence";
-import Attendence from "./pages/Attendence";
-import ManageCourses from "./pages/ManageCourses";
+import AttendanceRecords from "./pages/AttendanceRecords";
+import CourseManagement from "./pages/CourseManagement";
+import ClassManagement from "./pages/ClassManagement";
 import AddTeacher from "./pages/AddTeacher";
-import ManageClasses from "./pages/ManageClasses";
+import UpdateStudent from "./pages/UpdateStudent";
 
 //layouts
 import RootLayout from "./layouts/RootLayout";
+
+
 
 
 const router = createBrowserRouter(
@@ -20,13 +23,18 @@ const router = createBrowserRouter(
     <Route path="/" element={<RootLayout/>}>
         <Route index element={<Home />} />
         <Route path= "addstudent" element={<AddStudent />} />
-        <Route path= "showallstudents" element={<ShowAllStudents />} />
+        <Route path= "viewallstudents">
+          <Route index element={<ViewAllStudents />}/>
+          <Route 
+           path=":id" 
+           element={<UpdateStudent/>} 
+           />
+        </Route>
         <Route path= "addattendence" element={<AddAttendence />} />
-        <Route path= "attendence" element={<Attendence />} />
+        <Route path= "attendancerecords" element={<AttendanceRecords/>} />
         <Route path= "addteacher" element={<AddTeacher />} />
-        <Route path= "managecourses" element={<ManageCourses />} />
-        <Route path= "manageclasses" element={<ManageClasses />} />
-       
+        <Route path= "coursemanagement" element={<CourseManagement />} />
+        <Route path= "classmanagement" element={<ClassManagement />} />
     </Route>
     </>
 ))

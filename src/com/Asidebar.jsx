@@ -43,9 +43,9 @@ const Asidebar = () => {
 
               <ul className={` ${dropDownActive === "students" ? "dropdown_submenu" : "dnone" }`}>
                 <li> <Link to ="/addstudent">Add Student</Link></li>
-                <li> <Link to ="/showallstudents">Show All Stundent</Link></li>
+                <li> <Link to ="/viewallstudents">View All Stundent</Link></li>
                 <li> <Link to ="/addattendence">Add Attendence</Link></li>
-                <li> <Link to ="/attendence">Attendence</Link></li>
+                <li> <Link to ="/attendancerecords">Attendance Records</Link></li>
               </ul>
             </li>
 
@@ -74,23 +74,23 @@ const Asidebar = () => {
             <li>
               <button
               data-type="sidebar_dropdown" 
-              aria-expanded={dropDownActive === "miscellaneous" ? "false" : "true"}  
-              onClick={()=>{handleButtonSidebar('miscellaneous')}}>
-              miscellaneous
-              {dropDownActive === "miscellaneous" ? <ChevronUpIcon width={15}/> : <ChevronDownIcon width={15}/> }
+              aria-expanded={dropDownActive === "management" ? "false" : "true"}  
+              onClick={()=>{handleButtonSidebar('management')}}>
+              management
+              {dropDownActive === "management" ? <ChevronUpIcon width={15}/> : <ChevronDownIcon width={15}/> }
               </button>
 
               <button 
               data-type="sidebar_mobile" 
-              aria-expanded={dropDownActive === "miscellaneous" ? "false" : "true"} 
-              onClick={()=>{handleButtonSidebar('miscellaneous')}}
+              aria-expanded={dropDownActive === "management" ? "false" : "true"} 
+              onClick={()=>{handleButtonSidebar('management')}}
               >
               <UserIcon width={25}/>
               </button>
-
-              <ul className={` ${dropDownActive === "miscellaneous" ? "dropdown_submenu" : "dnone" }`}>
-                <li> <Link to ="/managecourses">Manage Courses</Link></li>
-                <li> <Link to ="/manageclasses">Manage Class</Link></li>
+              
+              <ul className={` ${dropDownActive === "management" ? "dropdown_submenu" : "dnone" }`}>
+              <li> <Link to ="/classmanagement">Class Management</Link></li>
+              <li> <Link to ="/coursemanagement">Course Managment</Link></li>
               </ul>
             </li>
           </ul>

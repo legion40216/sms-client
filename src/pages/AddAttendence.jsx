@@ -1,172 +1,186 @@
 import { useEffect, useState } from "react";
 
-
 const AddAttendence = () => {  
+  const [error, setError] = useState(null)
+  const [errorClassroom, setErrorClassroom] = useState(null)
+  const [success, setSuccess] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isGeneratingSheet, setIsGeneratingSheet] = useState(false);
+
     const currentDate = new Date()
     const [date, setDate] = useState(currentDate.toLocaleDateString('en-CA'))
-    const [students, setStudents] = useState(null)
-    const [attendanceData, setAttendanceData] = useState([]);
-    const [classTitle, setClassTitleData] = useState(null)
-    const [classValue, setClassValue] = useState("")
-    const [classSubjects, setClassSubjects] = useState("")
-    const [courseId, setCourseId] = useState("")
-    
-    const [error, setError] = useState(false)
-    const [successfulSubmit, setSuccessfulSubmit] = useState(false);
     const [showTable, setShowTable] = useState(false);
-    
-    const [isGeneratingSheet, setIsGeneratingSheet] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    
+    const [attendanceData, setAttendanceData] = useState([]);
+
+    const [students, setStudents] = useState([])
+    const [classrooms, setClassrooms] = useState([])
+
+    const [formData, setFormData] = useState({
+      classtitleId:"",
+      courses:[],
+      selectedCourseId:""
+  })
+
+  const UpdateForm = (change) =>{
+      setFormData((prevData)=>({...prevData, ...change}))
+  }
+
     useEffect(()=>{
-      const fetchclasstitle = async () =>{
+      const fetchClassrooms = async () =>{
         try {
-            const response = await fetch('https://awake-sparkly-prose.glitch.me/api/classrooms');
+            const response = await fetch('/api/classrooms');
             const json = await response.json();
 
             if (response.ok) {
-              setClassTitleData(json)
+              setError(null); // Clear error state on success
+              setErrorClassroom(null)
+              setClassrooms(json);
             } else {
-              // Handle error if needed
-              console.log('Error fetching courses:', json);
+              // Handle different HTTP status codes with specific error messages
+              if (response.status === 404) {
+                setErrorClassroom('Class not found');
+              }
+              else if (response.status === 500) {
+                setErrorClassroom('Server error');
+              } else {
+                setErrorClassroom('An error occurred while fetching data from server')
+              }    
             }
           } catch (error) {
             // Handle network error or other exceptions
             console.error('Error fetching courses:', error);
+            setErrorClassroom('An error occurred while fetching data');
           }
         };
-    fetchclasstitle()
+    fetchClassrooms()
   },[])
 
     const handleGenerateAttendence = async (event) =>{
       event.preventDefault()
-      setError(false)
-      if(classValue === ""|| courseId === "" )
+      setError(null)
+      setSuccess(null)
+      setShowTable(false)
+      setIsGeneratingSheet(true)
+      if(formData.classtitleId === "" || formData.selectedCourseId === "")
       {
         setError("Class or subject not selected")
+        setIsGeneratingSheet(false)
         return 
       }
-
+ 
       try {
-        setIsGeneratingSheet(true)
-        setSuccessfulSubmit(false)
         // Check if attendance records already exist for the selected date
         const response = await 
-        fetch(`https://awake-sparkly-prose.glitch.me/api/attendances/check?date=${date}&classtitle=${classSubjects._id}&courseId=${courseId}`);
+       fetch(`/api/attendances/check?date=${date}&classroom=${formData.classtitleId}&course=${formData.selectedCourseId}`);
         const existingRecords = await response.json();
-
-        if (!response.ok) {
-          // Handle specific error cases based on the HTTP response status
-          console.error('Error fetching students:', existingRecords);
-          // Optionally, you can throw an error to be caught by the calling code
-          throw new Error('Failed to fetch students');
-        }
- 
-        if (existingRecords) {
-
-          setError("Attendence Already Exist On This date")
-          setShowTable(false)
-          setIsGeneratingSheet(false)
-          return;
-        }
-        setShowTable(true)
+        if (response.ok) {
         try {
-
-            const response = await fetch(`https://awake-sparkly-prose.glitch.me/api/students/filter?classtitle=${classSubjects._id}`);
-            const json = await response.json();
-
-            if (!response.ok) {
-              // Handle specific error cases based on the HTTP response status
-              if (response.status === 404) {
-                setError('No students found for this class title');
-                setIsGeneratingSheet(false)
-                setShowTable(false)
-              } 
-              console.error('Error fetching students:', json);
-              // Optionally, you can throw an error to be caught by the calling code
-              throw new Error('Failed to fetch students');
+          const response = await fetch(`/api/students/filter?enrolledClass=${formData.classtitleId}`);
+          const json = await response.json();
+          if (response.ok) {
+            const initialAttendanceData = json.map(student => ({
+              student: student._id,
+              present: false,
+              classroom: formData.classtitleId,
+              course: formData.selectedCourseId,
+              date: date, 
+            }))
+            setAttendanceData(initialAttendanceData)
+            setStudents(json)
+            setIsGeneratingSheet(false)
+            setShowTable(true)
+          } else {
+            // Handle different HTTP status codes with specific error messages
+            if (response.status === 404) {
+              setError('No students found for this classroom');
             }
-              const initialAttendanceData = json.map(student => ({
-                student: student._id,
-                present: false,
-                classtitle: classSubjects._id,
-                course: courseId,
-                date: date, 
-              }))
-              setAttendanceData(initialAttendanceData)
-              setStudents(json)
-              setIsGeneratingSheet(false)
-  
-
-          } catch (error) {
-          console.error('Error fetching students:', error);
-          setIsGeneratingSheet(false)
+            else if (response.status === 500) {
+            setError('Server error');
+            } else {
+            setError('An error occurred while fetching data from server')
+            } 
+            setIsGeneratingSheet(false) 
           }
+        } catch (error) {
+          // Handle network error or other exceptions
+          console.error('Error fetching student filter:', error);
+          setError('An error occurred while fetching data');
+        }
+        
+      } else {
+        if (response.status === 404) {
+          setError(existingRecords.error)
+        }
+        else if (response.status === 500) {
+          setErrorClassroom('Server error');
+        } else {
+          setErrorClassroom('An error occurred while fetching data from server')
+        }    
+        setIsGeneratingSheet(false)
       }
-      catch (error) {
+
+      } catch (error) {
       console.error('Error generating attendance sheet:', error);
       setIsGeneratingSheet(false)
     }
     }
 
-      const handleCheckboxChange = (studentId, isChecked) => {
-        // Update the attendance status of the student with the given ID in the state
-        // console.log(id)
-        // setStudents((prevStudents) =>
-        // prevStudents.map((student) =>
-        //   student.student === id
-        //     ? { ...student, present: !student.present }
-        //     : student ));
-        setAttendanceData(prevData => 
-          prevData.map(item => 
-            item.student === studentId ? { ...item, present: isChecked } : item
-          )
-        );
-      };
-
-      const handleCourseSelect = (e) =>{
-        setShowTable(false)
-        setCourseId("")
-        setAttendanceData([])
-        setStudents(null)
-        setClassValue(e.target.value)
-
-        const selectedClass = classTitle.find((classname) => (
-          classname.classtitle === e.target.value
-          ));
-
-        setClassSubjects(selectedClass)
-      }
-
-    const handleSumbit = async () => {
+    const handleAttendenceSumbit = async (e) => {
+      e.preventDefault()
       setIsSubmitting(true);
-      const response = await fetch('https://awake-sparkly-prose.glitch.me/api/attendances',{
-       method: 'POST',
-       body: JSON.stringify(attendanceData),
-       headers: {
-         'Content-Type': 'application/json'
-       }
-      })
-      const json = await response.json()
-      if(!response.ok)
-      {
-        console.log("error" , json.error)
+      try {
+        const response = await fetch('/api/attendances/mark',{
+          method: 'POST',
+          body: JSON.stringify(attendanceData),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+         })
+        const json = await response.json()
+        if(response.ok)
+        {
+         setIsSubmitting(false)
+         setShowTable(false)
+         setSuccess("Attendence Successfully Submited")
+        } else {
+          if (response.status === 500) {
+            setError(json.error);
+          } else {
+            setError('An error occurred while creating entrie on server')
+          }  
+        }
         setIsSubmitting(false)
+      } catch (error) {
+        console.error('Error uploading Attendecne data to attendance:', error);
+        setError("Problem connecting to server")
+        setIsSubmitting(false);
       }
-      if(response.ok)
-      {
-       console.log("new attendence added" , json)
-       setIsSubmitting(false)
-       setShowTable(false)
-       setSuccessfulSubmit(true)
-      }
+}
+
+const handleCheckboxChange = (studentId, isChecked) => {
+  setAttendanceData(prevData => 
+    prevData.map(item => 
+      item.student === studentId ? { ...item, present: isChecked } : item
+    )
+  );
+};
+
+const handleClassroomSelect = (e) =>{
+  UpdateForm({classtitleId:e.target.value, courses:""})
+if(e.target.value)
+{
+  const selectedClass = classrooms.find((classtitle) => (
+    classtitle._id === e.target.value
+    ));
+    UpdateForm({courses:selectedClass.courses})
+}
 }
 
     return ( 
         <div className="flow">
             <div className="sms_table-options">
-                <form action="" className="flex">
+            <form action="" className="flex">
                 <div>
                 <input
                 type="date"
@@ -174,46 +188,53 @@ const AddAttendence = () => {
                 onChange={(e) => setDate(e.target.value)}
                 />
                 </div>
-                <div>
-                <select  
-                value={classValue}
-                onChange={(e)=>{handleCourseSelect(e)}} >
-                    <option value="" className="text-none">Select a class</option>
+
+              <div className="flex align-end">
+                <select id= "classtitle" 
+                name='classtitle' 
+                value={formData.classtitleId} 
+                className={`${errorClassroom ? "error_border" : ""}`}
+                onChange={(e)=>{handleClassroomSelect(e)}} >
+                    <option value="" className="text-none">Select class</option>
                     {
-                     classTitle && classTitle.map((classes)=>(
-                        <option key={classes._id} 
-                        value={classes.classtitle}>
-                          {classes.classtitle}
+                    classrooms && classrooms.map((classroom)=>(
+                        <option key={classroom._id} 
+                        value={classroom._id}>
+                          {classroom.classtitle}
                         </option>
                       ))
                     }
                 </select>
+                {errorClassroom &&  <div className="error"><p>{errorClassroom}</p></div>}
                 </div>
+
                 <div>
-                  {
-                    classSubjects && 
-                    <select
-                    value={courseId}
-                    onChange={(e)=>{setCourseId(e.target.value)}} >
+                 <select
+                    value={formData.selectedCourseId}
+                    onChange={(e)=>{UpdateForm({selectedCourseId:e.target.value})}} >
                     <option value={""}>select course</option>
                       {
-                        classSubjects.courseids.map((courses)=>(
-                          <option key={courses._id} value={courses._id}>{courses.course}</option>
+                         formData.courses.length > 0 && 
+                          formData.courses.map((course)=>(
+                          <option key={course._id} 
+                          value={course._id}>
+                            {course.courseName}
+                          </option>
                         ))
                       }
                     </select>  
-                  }
                 </div>
              <button 
              type="submit" 
-             onClick={(e)=>{handleGenerateAttendence(e)}}
+             onClick={handleGenerateAttendence}
              data-type={`${isGeneratingSheet ? "primary-disable" :"primary"}`} 
              disabled={isGeneratingSheet}>
              {isGeneratingSheet ? 'Generating...' : 'Generate'}
              </button>
-                </form>
-            </div>
-  <div className="flow">
+        </form>
+      </div>
+
+<div className="flow">
 {showTable &&          
 <div className="container-sms_content flow">
 <div>
@@ -236,8 +257,8 @@ const AddAttendence = () => {
     students.map((student, index) => (
         <tr key={student._id}>
          <td>{student.name}</td>
-         <td>{student.rollno}</td>
-         <td>{student.classtitle.classtitle}</td>
+         <td>{student.rollNo}</td>
+         <td>{student.enrolledClass.classtitle}</td>
          <td className="text-center">
             <input type="checkbox" 
             checked={attendanceData[index].present || false}
@@ -254,14 +275,14 @@ const AddAttendence = () => {
 <div>
         <button
         data-type={`${isSubmitting ? "primary-disable" :"primary"}`} 
-        disabled={isSubmitting} onClick={handleSumbit}>
+        disabled={isSubmitting} onClick={(e)=>{handleAttendenceSumbit(e)}}>
         {isSubmitting ? 'Submiting...' : 'Submit'}
         </button>
 </div>
 </div>
 }
 {error &&  <div className="error"> <p>{error}</p></div>}
-{successfulSubmit &&  <div className="success"> <p>Attendence Successfully Submited</p> </div>}
+{success &&  <div className="success"> <p>{success}</p> </div>}
 </div>
 </div>
      );
